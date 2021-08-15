@@ -131,7 +131,7 @@ namespace EnemyListDebuffs
                     }
                     else
                     {
-                        var localPlayerID = _plugin.Interface.ClientState.LocalPlayer.ActorId;
+                        var localPlayerID = _plugin.Interface.ClientState.LocalPlayer?.ActorId;
                         var enemyObjectID = numArray->IntArray[8 + i * 5];
                         var enemyChara = CharacterManager.Instance()->LookupBattleCharaByObjectId(enemyObjectID);
 
