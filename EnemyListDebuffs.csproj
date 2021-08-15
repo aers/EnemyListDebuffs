@@ -2,10 +2,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>EnemyListDebuffs</PackageId>
-    <Version>0.1.0.0</Version>
+    <Version>0.1.1.0</Version>
     <Authors>aers</Authors>
     <Company>-</Company>
-    <Description></Description>
+    <Description>Dalamud plugin that shows debuffs on the Enemy List.</Description>
     <PackageProjectUrl>https://github.com/aers/EnemyListDebuffs</PackageProjectUrl>
   </PropertyGroup>
 

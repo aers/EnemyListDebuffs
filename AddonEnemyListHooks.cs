@@ -31,15 +31,15 @@ namespace EnemyListDebuffs
         }
 
         private readonly EnemyListDebuffsPlugin _plugin;
+
+        private readonly Stopwatch Timer;
         private long Elapsed;
         private Hook<AddonEnemyListFinalizePrototype> hookAddonEnemyListFinalize;
 
         private AddonEnemyListDrawPrototype OrigDrawFunc;
-        private AddonEnemyListDrawPrototype ReplaceDrawFunc;
 
         private IntPtr OrigEnemyListDrawFuncPtr;
-
-        private readonly Stopwatch Timer;
+        private AddonEnemyListDrawPrototype ReplaceDrawFunc;
 
         public AddonEnemyListHooks(EnemyListDebuffsPlugin p)
         {
@@ -131,9 +131,15 @@ namespace EnemyListDebuffs
                     }
                     else
                     {
-                        var localPlayerID = _plugin.Interface.ClientState.LocalPlayer?.ActorId;
-                        var enemyObjectID = numArray->IntArray[8 + i * 5];
-                        var enemyChara = CharacterManager.Instance()->LookupBattleCharaByObjectId(enemyObjectID);
+                        var localPlayerId = _plugin.Interface.ClientState.LocalPlayer?.ActorId;
+                        if (localPlayerId is null)
+                        {
+                            _plugin.StatusNodeManager.HideUnusedStatus(i, 0);
+                            continue;
+                        }
+
+                        var enemyObjectId = numArray->IntArray[8 + i * 5];
+                        var enemyChara = CharacterManager.Instance()->LookupBattleCharaByObjectId(enemyObjectId);
 
                         if (enemyChara is null) continue;
 
@@ -147,7 +153,7 @@ namespace EnemyListDebuffs
                         {
                             var status = statusArray[j];
                             if (status.StatusID == 0) continue;
-                            if (status.SourceID != localPlayerID) continue;
+                            if (status.SourceID != localPlayerId) continue;
 
                             _plugin.StatusNodeManager.SetStatus(i, count, status.StatusID, (int)status.RemainingTime);
                             count++;
@@ -162,7 +168,7 @@ namespace EnemyListDebuffs
                 Elapsed = 0;
             }
 
-           OrigDrawFunc(thisPtr);
+            OrigDrawFunc(thisPtr);
         }
 
         public void AddonEnemyListFinalizeDetour(AddonEnemyList* thisPtr)
