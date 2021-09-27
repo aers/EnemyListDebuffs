@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Dalamud;
 using Dalamud.Hooking;
+using Dalamud.Logging;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
@@ -11,7 +12,7 @@ using FFXIVClientStructs.FFXIV.Client.UI;
 
 namespace EnemyListDebuffs
 {
-    internal unsafe class AddonEnemyListHooks : IDisposable
+    public unsafe class AddonEnemyListHooks : IDisposable
     {
         public enum MemoryProtection
         {
@@ -131,7 +132,7 @@ namespace EnemyListDebuffs
                     }
                     else
                     {
-                        var localPlayerId = _plugin.Interface.ClientState.LocalPlayer?.ActorId;
+                        var localPlayerId = _plugin.ClientState.LocalPlayer?.ObjectId;
                         if (localPlayerId is null)
                         {
                             _plugin.StatusNodeManager.HideUnusedStatus(i, 0);

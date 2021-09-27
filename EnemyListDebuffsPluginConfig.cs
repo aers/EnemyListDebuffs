@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace EnemyListDebuffs
 {
     [Serializable]
-    internal class EnemyListDebuffsPluginConfig : IPluginConfiguration
+    public class EnemyListDebuffsPluginConfig : IPluginConfiguration
     {
         public int Version { get; set; } = 0;
 

@@ -2,10 +2,11 @@
 using FFXIVClientStructs.FFXIV.Client.System.Memory;
 using FFXIVClientStructs.FFXIV.Component.GUI;
 using System;
+using Dalamud.Logging;
 
 namespace EnemyListDebuffs.StatusNode
 {
-    internal unsafe class StatusNodeGroup
+    public unsafe class StatusNodeGroup
     {
         private EnemyListDebuffsPlugin _plugin;
 

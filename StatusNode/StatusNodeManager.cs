@@ -15,13 +15,13 @@ using System.Threading.Tasks;
 
 namespace EnemyListDebuffs.StatusNode
 {
-    internal unsafe class StatusNodeManager : IDisposable
+    public unsafe class StatusNodeManager : IDisposable
     {
-        private EnemyListDebuffsPlugin _plugin;
+        private static EnemyListDebuffsPlugin _plugin;
 
-        private AddonEnemyList* enemyListAddon;
+        private static AddonEnemyList* enemyListAddon;
 
-        private StatusNodeGroup[] NodeGroups;
+        private static StatusNodeGroup[] NodeGroups;
 
         private ExcelSheet<Status> StatusSheet;
 
@@ -35,12 +35,11 @@ namespace EnemyListDebuffs.StatusNode
 
             NodeGroups = new StatusNodeGroup[AddonEnemyList.MaxEnemyCount];
 
-            StatusSheet = _plugin.Interface.Data.GetExcelSheet<Status>();
+            StatusSheet = _plugin.DataManager.GetExcelSheet<Status>();
         }
 
         public void Dispose()
         {
-            DestroyNodes();
         }
 
         public void SetEnemyListAddonPointer(AddonEnemyList* addon)

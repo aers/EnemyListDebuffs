@@ -9,7 +9,7 @@ using Dalamud.Interface.Components;
 
 namespace EnemyListDebuffs
 {
-    internal class EnemyListDebuffsPluginUI : IDisposable
+    public class EnemyListDebuffsPluginUI : IDisposable
     {
         private readonly EnemyListDebuffsPlugin _plugin;
 
@@ -24,14 +24,14 @@ namespace EnemyListDebuffs
         {
             _plugin = p;
 
-            _plugin.Interface.UiBuilder.OnOpenConfigUi += UiBuilder_OnOpenConfigUi;
-            _plugin.Interface.UiBuilder.OnBuildUi += UiBuilder_OnBuild;
+            _plugin.Interface.UiBuilder.OpenConfigUi += UiBuilder_OnOpenConfigUi;
+            _plugin.Interface.UiBuilder.Draw += UiBuilder_OnBuild;
         }
 
         public void Dispose()
         {
-            _plugin.Interface.UiBuilder.OnOpenConfigUi -= UiBuilder_OnOpenConfigUi;
-            _plugin.Interface.UiBuilder.OnBuildUi -= UiBuilder_OnBuild;
+            _plugin.Interface.UiBuilder.OpenConfigUi -= UiBuilder_OnOpenConfigUi;
+            _plugin.Interface.UiBuilder.Draw -= UiBuilder_OnBuild;
         }
 
         public void ToggleConfig()
@@ -39,7 +39,7 @@ namespace EnemyListDebuffs
             ConfigOpen = !ConfigOpen;
         }
 
-        public void UiBuilder_OnOpenConfigUi(object sender, EventArgs args) => ConfigOpen = true;
+        public void UiBuilder_OnOpenConfigUi() => ConfigOpen = true;
 
         public void UiBuilder_OnBuild()
         {

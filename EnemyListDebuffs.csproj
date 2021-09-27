@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <PackageId>EnemyListDebuffs</PackageId>
-    <Version>0.1.1.0</Version>
+    <Version>0.2.0.0</Version>
     <Authors>aers</Authors>
     <Company>-</Company>
     <Description>Dalamud plugin that shows debuffs on the Enemy List.</Description>
@@ -16,7 +16,7 @@
     <AssemblyName>EnemyListDebuffs</AssemblyName>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net5.0-windows</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -49,26 +49,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="1.2.2" />
-    <PackageReference Include="ILRepack" Version="2.0.18" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <Reference Include="FFXIVClientStructs">
-      <HintPath>..\..\FFXIVClientStructs\bin\Debug\FFXIVClientStructs.dll</HintPath>
-    </Reference>
-    <Reference Include="FFXIVClientStructs.Common">
-      <HintPath>..\..\FFXIVClientStructs\bin\Debug\FFXIVClientStructs.Common.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <Reference Include="FFXIVClientStructs">
-      <HintPath>..\..\FFXIVClientStructs\bin\Release\FFXIVClientStructs.dll</HintPath>
-    </Reference>
-    <Reference Include="FFXIVClientStructs.Common">
-      <HintPath>..\..\FFXIVClientStructs\bin\Release\FFXIVClientStructs.Common.dll</HintPath>
-    </Reference>
+    <PackageReference Include="DalamudPackager" Version="2.1.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -96,33 +77,20 @@
       <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
       <Private>False</Private>
     </Reference>
+	<Reference Include="FFXIVClientStructs">
+      <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 
-  <Target Name="ILRepack" AfterTargets="Build">
-    <ItemGroup>
-      <InputAssemblies Include="$(TargetPath)" />
-      <InputAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
-    </ItemGroup>
-    <Exec Command="$(PkgILRepack)\tools\ILRepack.exe /lib:$(DalamudLibPath) /out:$(TargetDir)$(TargetFileName) @(InputAssemblies, ' ')" />
-  </Target>
-
-  <Target Name="LivePluginLoadCopy" AfterTargets="CleanOutDir" Condition=" '$(Configuration)' == 'Debug' ">
-    <Message Text="Copying for LPL" Importance="high" />
-    <Exec Command="if not exist $(TargetDir)LPL ( mkdir $(TargetDir)LPL )" />
-    <Exec Command="copy $(TargetPath) $(TargetDir)LPL\$(TargetFileName)" />
-    <Exec Command="copy $(TargetDir)*.pdb $(TargetDir)LPL\" />
-  </Target>
-
-  <Target Name="CleanOutDir" AfterTargets="ILRepack">
-    <ItemGroup>
-      <DeleteAssemblies Include="$(TargetDir)*.dll" Exclude="$(TargetPath)" />
-    </ItemGroup>
-    <Message Text="Deleting @(DeleteAssemblies)" Importance="high" />
-    <Delete Files="@(DeleteAssemblies)" />
-  </Target>
-
-  <Target Name="PackagePlugin" AfterTargets="CleanOutDir" Condition=" '$(Configuration)' == 'Release' ">
-    <Message Text="Starting DalamudPackager" Importance="high" />
-    <DalamudPackager ProjectDir="$(ProjectDir)" OutputPath="$(OutputPath)" AssemblyName="$(AssemblyName)" VersionComponents="4" MakeZip="true" />
-  </Target>
+  <!-- Dalamud Packager Task-->
+    <Target Name="DalamudPackage" AfterTargets="Build">
+        <DalamudPackager 
+                ProjectDir="$(ProjectDir)" 
+                OutputPath="$(TargetDir)..\$(Configuration)" 
+                AssemblyName="$(AssemblyName)" 
+                MakeZip="true"
+                VersionComponents="3"
+        />
+    </Target>
  </Project>

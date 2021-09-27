@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dalamud.Logging;
 
 namespace EnemyListDebuffs
 {
-    internal class PluginAddressResolver : BaseAddressResolver
+    public class PluginAddressResolver : BaseAddressResolver
     {
         public IntPtr AddonEnemyListFinalizeAddress { get; private set;  }
 
