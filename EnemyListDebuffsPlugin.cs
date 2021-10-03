@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dalamud.Data;
+using Dalamud.Game;
+using Dalamud.Game.ClientState;
+using Dalamud.Logging;
 using EnemyListDebuffs.StatusNode;
 
 namespace EnemyListDebuffs
@@ -13,19 +17,35 @@ namespace EnemyListDebuffs
     public class EnemyListDebuffsPlugin : IDalamudPlugin
     {
         public string Name => "EnemyListDebuffs";
-
-        internal DalamudPluginInterface Interface;
-        internal PluginAddressResolver Address;
-        internal StatusNodeManager StatusNodeManager;
-        internal AddonEnemyListHooks Hooks;
-        internal EnemyListDebuffsPluginUI UI;
-        internal EnemyListDebuffsPluginConfig Config;
+        
+        public ClientState ClientState { get; private set; } = null!;
+        public static CommandManager CommandManager { get; private set; } = null!;
+        public DalamudPluginInterface Interface { get; private set; } = null!;
+        public DataManager DataManager { get; private set; } = null!;
+        public Framework Framework { get; private set; } = null!;
+        public PluginAddressResolver Address { get; private set; } = null!;
+        public StatusNodeManager StatusNodeManager { get; private set; } = null!;
+        public static SigScanner SigScanner { get; private set; } = null!;
+        public static AddonEnemyListHooks Hooks { get; private set; } = null!;
+        public EnemyListDebuffsPluginUI UI { get; private set; } = null!;
+        public EnemyListDebuffsPluginConfig Config { get; private set; } = null!;
 
         internal bool InPvp;
 
-        public void Initialize(DalamudPluginInterface pluginInterface)
+        public EnemyListDebuffsPlugin(
+            ClientState clientState,
+            CommandManager commandManager, 
+            DalamudPluginInterface pluginInterface, 
+            DataManager dataManager,
+            Framework framework, 
+            SigScanner sigScanner)
         {
-            Interface = pluginInterface ?? throw new ArgumentNullException(nameof(pluginInterface), "DalamudPluginInterface cannot be null");
+            ClientState = clientState;
+            CommandManager = commandManager;
+            DataManager = dataManager;
+            Interface = pluginInterface;
+            Framework = framework;
+            SigScanner = sigScanner;
 
             Config = pluginInterface.GetPluginConfig() as EnemyListDebuffsPluginConfig ?? new EnemyListDebuffsPluginConfig();
             Config.Initialize(pluginInterface);
@@ -33,7 +53,7 @@ namespace EnemyListDebuffs
             if (!FFXIVClientStructs.Resolver.Initialized) FFXIVClientStructs.Resolver.Initialize();
 
             Address = new PluginAddressResolver();
-            Address.Setup(Interface.TargetModuleScanner);
+            Address.Setup();
 
             StatusNodeManager = new StatusNodeManager(this);
 
@@ -42,17 +62,17 @@ namespace EnemyListDebuffs
 
             UI = new EnemyListDebuffsPluginUI(this);
 
-            Interface.ClientState.TerritoryChanged += OnTerritoryChange;
+            ClientState.TerritoryChanged += OnTerritoryChange;
 
-            Interface.CommandManager.AddHandler("/eldebuffs", new CommandInfo(this.ToggleConfig)
+            CommandManager.AddHandler("/eldebuffs", new CommandInfo(this.ToggleConfig)
             {
                 HelpMessage = "Toggles config window."
             });
         }
         public void Dispose()
         {
-            Interface.ClientState.TerritoryChanged -= OnTerritoryChange;
-            Interface.CommandManager.RemoveHandler("/eldebuffs");
+            ClientState.TerritoryChanged -= OnTerritoryChange;
+            CommandManager.RemoveHandler("/eldebuffs");
 
             UI.Dispose();
             Hooks.Dispose();
@@ -63,8 +83,8 @@ namespace EnemyListDebuffs
         {
             try
             {
-                var territory = this.Interface.Data.GetExcelSheet<TerritoryType>().GetRow(e);
-                this.InPvp = territory.IsPvpZone;
+                var territory = DataManager.GetExcelSheet<TerritoryType>()?.GetRow(e);
+                if (territory != null) InPvp = territory.IsPvpZone;
             }
             catch (KeyNotFoundException)
             {
