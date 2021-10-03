@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Dalamud;
 using Dalamud.Hooking;
 using Dalamud.Logging;
+using Dalamud.Memory;
 using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
@@ -14,23 +15,6 @@ namespace EnemyListDebuffs
 {
     public unsafe class AddonEnemyListHooks : IDisposable
     {
-        public enum MemoryProtection
-        {
-            Execute = 0x10,
-            ExecuteRead = 0x20,
-            ExecuteReadWrite = 0x40,
-            ExecuteWriteCopy = 0x80,
-            NoAccess = 0x01,
-            ReadOnly = 0x02,
-            ReadWrite = 0x04,
-            WriteCopy = 0x08,
-            TargetsInvalid = 0x40000000,
-            TargetsNoUpdate = TargetsInvalid,
-            Guard = 0x100,
-            NoCache = 0x200,
-            WriteCombine = 0x400
-        }
-
         private readonly EnemyListDebuffsPlugin _plugin;
 
         private readonly Stopwatch Timer;
@@ -54,18 +38,11 @@ namespace EnemyListDebuffs
         {
             hookAddonEnemyListFinalize.Dispose();
             var vtblFuncAddr = _plugin.Address.AddonEnemyListVTBLAddress + 38 * IntPtr.Size;
-            VirtualProtect(vtblFuncAddr, new UIntPtr(8), MemoryProtection.ReadWrite, out var oldProtect);
+            MemoryHelper.ChangePermission(vtblFuncAddr, 8, MemoryProtection.ReadWrite, out var oldProtect);
             SafeMemory.Write(_plugin.Address.AddonEnemyListVTBLAddress + 38 * IntPtr.Size, OrigEnemyListDrawFuncPtr);
-            VirtualProtect(vtblFuncAddr, new UIntPtr(8), oldProtect, out oldProtect);
+            MemoryHelper.ChangePermission(vtblFuncAddr, 8, oldProtect, out oldProtect);
         }
-
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        public static extern bool VirtualProtect(
-            IntPtr lpAddress,
-            UIntPtr dwSize,
-            MemoryProtection flNewProtection,
-            out MemoryProtection lpflOldProtect);
-
+        
         public void Initialize()
         {
             hookAddonEnemyListFinalize =
@@ -81,9 +58,9 @@ namespace EnemyListDebuffs
             var replaceDrawFuncPtr = Marshal.GetFunctionPointerForDelegate(ReplaceDrawFunc);
 
             var vtblFuncAddr = _plugin.Address.AddonEnemyListVTBLAddress + 38 * IntPtr.Size;
-            VirtualProtect(vtblFuncAddr, new UIntPtr(8), MemoryProtection.ReadWrite, out var oldProtect);
+            MemoryHelper.ChangePermission(vtblFuncAddr, 8, MemoryProtection.ReadWrite, out var oldProtect);
             SafeMemory.Write(vtblFuncAddr, replaceDrawFuncPtr);
-            VirtualProtect(vtblFuncAddr, new UIntPtr(8), oldProtect, out oldProtect);
+            MemoryHelper.ChangePermission(vtblFuncAddr, 8, oldProtect, out oldProtect);
 
             hookAddonEnemyListFinalize.Enable();
         }
