@@ -17,15 +17,15 @@ namespace EnemyListDebuffs.StatusNode
 {
     public unsafe class StatusNodeManager : IDisposable
     {
-        private static EnemyListDebuffsPlugin _plugin;
+        private EnemyListDebuffsPlugin _plugin;
 
-        private static AddonEnemyList* enemyListAddon;
+        private AddonEnemyList* enemyListAddon;
 
-        private static StatusNodeGroup[] NodeGroups;
+        private StatusNodeGroup[] NodeGroups;
 
         private ExcelSheet<Status> StatusSheet;
 
- private static uint StartingNodeId = 50000;
+        private static uint StartingNodeId = 50000;
 
         public bool Built { get; private set; }
 
@@ -40,6 +40,7 @@ namespace EnemyListDebuffs.StatusNode
 
         public void Dispose()
         {
+            DestroyNodes();
         }
 
         public void SetEnemyListAddonPointer(AddonEnemyList* addon)
